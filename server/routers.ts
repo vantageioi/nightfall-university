@@ -18,7 +18,7 @@ import { extractAdminIntakeDrafts } from "./adminIntakeAI";
 import { runStudentConsultation } from "./domain/consultingService";
 import { prepareEssayDraft } from "./domain/essayDraftingService";
 import { generateProgrammeBriefing, listParsedBriefings } from "./domain/programmeBriefingService";
-import { generateAiFollowUpDraft, sendApprovedUniversityCommunication as deliverApprovedUniversityCommunication, syncUniversityRepliesFromInbox } from "./domain/universityCommunicationService";
+import { generateAiFollowUpDraft, sendApprovedUniversityCommunication as deliverApprovedUniversityCommunication, syncUniversityRepliesFromInbox, triagePastedUniversityReply } from "./domain/universityCommunicationService";
 import { syncRequirementWatch, updateReminderPreferencesWithSchedule, updateUniversityWatchPreferencesWithSchedule } from "./domain/schedulingService";
 import { extractTranscriptSnapshot } from "./domain/transcriptService";
 import { PLAN_LIMITS, normalizePlan } from "./domain/planLimits";
@@ -85,6 +85,7 @@ const universityCommunicationDraftInput = z.object({ universityId: z.number().in
 const universityCommunicationUpdateInput = universityCommunicationDraftInput.omit({ universityId: true, contactId: true }).extend({ communicationId: z.number().int().positive() });
 const universityFollowUpPlanInput = z.object({ universityId: z.number().int().positive(), contactId: z.number().int().positive().optional(), dueAt: z.number().int().positive(), reason: z.string().trim().min(2).max(240) });
 const universityAiDraftInput = z.object({ universityId: z.number().int().positive(), contactId: z.number().int().positive().optional(), purpose: z.string().trim().min(2).max(600), language: z.enum(["en", "ar"]) });
+const pastedUniversityReplyTriageInput = z.object({ language: z.enum(["en", "ar"]), subject: z.string().trim().max(998).optional(), body: z.string().trim().min(10).max(6000) });
 export const consultingInput = z.object({ language: z.enum(["en", "ar"]), messages: z.array(consultingMessageSchema).min(1).max(10), focusedProgrammeId: z.string().trim().min(1).max(180).optional() });
 export const studentFitProfileInput = z.object({ studyDirection: z.string().trim().min(2).max(240), studyLevel: z.string().trim().max(80).optional(), academicAverage: z.string().trim().max(80).optional(), gradeScale: z.string().trim().max(120).optional(), qualifications: z.string().trim().max(2400).optional(), nationality: z.string().trim().max(120).optional(), languageComfort: z.string().trim().max(320).optional(), tuitionBudgetBand: z.enum(["low", "medium", "flexible", "unsure"]).optional(), fundingRoute: z.enum(["self_funded", "sponsor", "scholarship", "mixed", "unsure"]).optional(), hasSponsor: z.boolean(), priorities: z.string().trim().max(2400).optional(), consent: z.boolean() }).superRefine((value, context) => {
   if (!isMeaningfulStudyDirection(value.studyDirection)) context.addIssue({ code: "custom", path: ["studyDirection"], message: "Choose a recognised study direction or select that you are still exploring." });
@@ -284,6 +285,7 @@ export const appRouter = router({
     saveUniversityContact: protectedProcedure.input(universityContactInput).mutation(({ ctx, input }) => saveUniversityContact(ctx.user.id, input)),
     createUniversityCommunicationDraft: protectedProcedure.input(universityCommunicationDraftInput).mutation(({ ctx, input }) => createUniversityCommunicationDraft(ctx.user.id, input)),
     generateUniversityCommunicationDraft: protectedProcedure.input(universityAiDraftInput).mutation(({ ctx, input }) => generateAiFollowUpDraft(ctx.user.id, input)),
+    triagePastedUniversityReply: protectedProcedure.input(pastedUniversityReplyTriageInput).mutation(({ ctx, input }) => triagePastedUniversityReply(ctx.user.id, input)),
     generateEssayDraft: protectedProcedure.input(essayDraftInputSchema).mutation(({ ctx, input }) => prepareEssayDraft(ctx.user.id, input)),
     updateUniversityCommunicationDraft: protectedProcedure.input(universityCommunicationUpdateInput).mutation(({ ctx, input }) => updateUniversityCommunicationDraft(ctx.user.id, input)),
     approveUniversityCommunication: protectedProcedure.input(z.object({ communicationId: z.number().int().positive() })).mutation(({ ctx, input }) => approveUniversityCommunication(ctx.user.id, input.communicationId)),
