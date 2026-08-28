@@ -271,3 +271,4 @@
 - [ ] Expose a non-secret platform Gemini readiness flag on the public health endpoint so deployment configuration can be verified without signing in or generating AI content.
 - [ ] Create a sanitized GitHub repository snapshot of the authoritative Nightfall source, excluding secrets, private data, local artifacts, and generated deployment output.
 - [ ] Verify the GitHub repository contains the reproducible source and documentation without credential values or private student records.
+- [x] Provide a compliant per-student Gmail Outreach authorization alternative that supports manually approved sends from the student’s own address without relying on the blocked Google OAuth test-user flow. Approved drafts now open in the student’s own Gmail compose window; Nightfall never sends or reads a mailbox through this fallback.
