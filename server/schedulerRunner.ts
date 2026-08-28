@@ -7,7 +7,7 @@ const WINDOW_MINUTES = 15;
 const STALE_RUN_MS = 10 * 60 * 1000;
 const DEADLINE_BATCH_SIZE = 24;
 // A source fetch may take up to 15 seconds. Keep only two students in flight
-// so cron-job.org's 30-second response window is respected without a fan-out.
+// so the scheduled serverless invocation remains bounded without a fan-out.
 const WATCH_PREFERENCE_BATCH_SIZE = 2;
 
 export function getSchedulerWindowKey(jobKey: string, now = new Date()) {
@@ -50,7 +50,10 @@ export async function runDueDeadlineNudges(now = new Date(), limit = DEADLINE_BA
   try {
     const db = await getDb();
     if (!db) throw new Error("Database is unavailable");
-    const duePreferences = await db.select().from(reminderPreferences).where(and(eq(reminderPreferences.enabled, true), eq(reminderPreferences.preferredHourUtc, now.getUTCHours()))).limit(limit);
+    // Vercel Hobby invokes the production scheduler once daily, not hourly.
+    // The preference remains an informational student setting; enabled users
+    // are reconciled on every daily run rather than silently skipped.
+    const duePreferences = await db.select().from(reminderPreferences).where(eq(reminderPreferences.enabled, true)).limit(limit);
     let created = 0;
     for (const preferences of duePreferences) {
       const result = await createDeadlineAlertsForPreferences(preferences, now);
@@ -74,7 +77,7 @@ export async function runDueUniversityRequirementWatches(now = new Date(), limit
   try {
     const db = await getDb();
     if (!db) throw new Error("Database is unavailable");
-    const duePreferences = await db.select().from(universityWatchPreferences).where(and(eq(universityWatchPreferences.enabled, true), eq(universityWatchPreferences.preferredHourUtc, now.getUTCHours()))).limit(limit);
+    const duePreferences = await db.select().from(universityWatchPreferences).where(eq(universityWatchPreferences.enabled, true)).limit(limit);
     const results = await Promise.all(duePreferences.map((preferences) => runUniversityRequirementsWatchForUser(preferences.userId, 1)));
     let checked = 0;
     let changed = 0;

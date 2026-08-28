@@ -21,6 +21,20 @@ function cronError(error: unknown, req: express.Request) {
 }
 
 export function registerCronRoutes(app: express.Express) {
+  const runDaily = async (req: express.Request, res: express.Response) => {
+    if (!isCronRequestAuthorized(req.header("authorization"))) return res.status(403).json({ error: "cron-only" });
+    try {
+      const [deadlines, sourceWatches] = await Promise.all([runDueDeadlineNudges(), runDueUniversityRequirementWatches()]);
+      return res.json({ ok: true, deadlines, sourceWatches });
+    } catch (error) {
+      return res.status(500).json(cronError(error, req));
+    }
+  };
+
+  // Vercel Cron uses GET and automatically includes Bearer CRON_SECRET.
+  app.get("/api/cron/daily", runDaily);
+  // Retain protected POST triggers for an operator-controlled diagnostic run.
+  app.post("/api/cron/daily", runDaily);
   app.post("/api/cron/deadline-nudges", async (req, res) => {
     if (!isCronRequestAuthorized(req.header("authorization"))) return res.status(403).json({ error: "cron-only" });
     try {
@@ -32,11 +46,8 @@ export function registerCronRoutes(app: express.Express) {
 
   app.post("/api/cron/source-watches", async (req, res) => {
     if (!isCronRequestAuthorized(req.header("authorization"))) return res.status(403).json({ error: "cron-only" });
-    try {
-      return res.json({ ok: true, ...(await runDueUniversityRequirementWatches()) });
-    } catch (error) {
-      return res.status(500).json(cronError(error, req));
-    }
+    try { return res.json({ ok: true, ...(await runDueUniversityRequirementWatches()) }); }
+    catch (error) { return res.status(500).json(cronError(error, req)); }
   });
 
   // The old per-user in-memory scheduler callbacks cannot operate safely on a
