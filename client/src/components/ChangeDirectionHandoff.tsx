@@ -1,0 +1,21 @@
+import { ArrowLeft, ArrowRight, MessageCircle } from "lucide-react";
+import { FormEvent, useState } from "react";
+
+const copy = {
+  en: {
+    kicker: "NIGHTFALL / A CHANGE OF DIRECTION", title: "Tell me what changed.", body: "You do not need to turn this into a plan right now. You can say “I want to explore Biotech,” “Anthropology is on my mind,” or simply “I got rejected.”", note: "What happened, or what are you thinking about now?", noteHint: "Write it in your own words…", direction: "Is there a subject you want to explore now?", directionHint: "For example, Biotechnology or Anthropology", optional: "Optional. It will not change your saved direction yet.", continue: "Continue the conversation", private: "This stays in this browser until you choose to send a question to the Consultant.", back: "Back to my journey", clarify: "A few words are enough. You do not need to explain everything.",
+  },
+  ar: {
+    kicker: "نايتفول / تغيير بالاتجاه", title: "قلّي شو تغيّر.", body: "ما بدك تحوّل هالشي لخطة هلق. فيك تقول «عم فكّر بالبيوتكنولوجيا»، «الأنثروبولوجيا صارت ببالي»، أو بس «انرفضت». ", note: "شو صار، أو شو عم تفكّر فيه هلق؟", noteHint: "اكتب بطريقتك…", direction: "في مجال بدك تستكشفه هلق؟", directionHint: "مثلاً، بيوتكنولوجيا أو أنثروبولوجيا", optional: "اختياري. ما رح يغيّر اتجاهك المحفوظ هلق.", continue: "كمّل الحديث", private: "هالشي بيضل بهالمتصفح لحد ما تختار تبعت سؤال للمستشار.", back: "ارجع لرحلتي", clarify: "كم كلمة بكفّوا. ما بدك تشرح كل شي.",
+  },
+} as const;
+
+export function ChangeDirectionHandoff({ language, onContinue, onBack }: { language: "en" | "ar"; onContinue: (value: { note: string; direction: string }) => void; onBack: () => void }) {
+  const t = copy[language];
+  const isArabic = language === "ar";
+  const [note, setNote] = useState("");
+  const [direction, setDirection] = useState("");
+  const [feedback, setFeedback] = useState("");
+  const submit = (event: FormEvent) => { event.preventDefault(); if (!note.trim() && !direction.trim()) { setFeedback(t.clarify); return; } onContinue({ note: note.trim(), direction: direction.trim() }); };
+  return <section className="mx-auto max-w-3xl pb-14" aria-labelledby="change-direction-heading"><p className="nf-label text-[9px] tracking-[.15em] text-white/45">// {t.kicker}</p><h1 id="change-direction-heading" className="mt-5 max-w-2xl text-5xl font-semibold leading-[.88] tracking-[-.075em] sm:text-7xl">{t.title}</h1><p className="mt-6 max-w-2xl text-base leading-7 text-white/62">{t.body}</p><form onSubmit={submit} className="mt-10 border-y border-white/20 py-7 sm:py-9"><label className="block"><span className="nf-label text-[9px] text-white/48">{t.note}</span><textarea value={note} onChange={(event) => setNote(event.target.value)} rows={4} placeholder={t.noteHint} className="mt-5 w-full resize-none border-b border-white/30 bg-transparent px-0 py-4 text-xl leading-8 text-white outline-none placeholder:text-white/28 focus:border-white" autoFocus /></label><label className="mt-9 block"><span className="nf-label text-[9px] text-white/48">{t.direction}</span><input value={direction} onChange={(event) => setDirection(event.target.value)} placeholder={t.directionHint} className="mt-4 w-full border-b border-white/22 bg-transparent px-0 py-3 text-base text-white outline-none placeholder:text-white/28 focus:border-white" /><span className="mt-3 block text-xs leading-5 text-white/45">{t.optional}</span></label>{feedback && <p role="alert" className="mt-5 border-l border-white/35 pl-3 text-xs leading-5 text-white/70">{feedback}</p>}<div className="mt-9 flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between"><button type="button" onClick={onBack} className="nf-button inline-flex items-center gap-2 text-xs text-white/58 hover:text-white"><ArrowLeft className={`h-3.5 w-3.5 ${isArabic ? "rotate-180" : ""}`} />{t.back}</button><button type="submit" className="nf-button inline-flex items-center justify-center gap-2 border border-white bg-white px-5 py-3.5 text-[10px] font-bold uppercase tracking-[.09em] text-black hover:bg-[#e9e9e9]"><MessageCircle className="h-3.5 w-3.5" />{t.continue}<ArrowRight className={`h-3.5 w-3.5 ${isArabic ? "rotate-180" : ""}`} /></button></div></form><p className="mt-5 border-l border-white/20 pl-4 text-xs leading-5 text-white/48">{t.private}</p></section>;
+}

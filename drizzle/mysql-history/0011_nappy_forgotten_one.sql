@@ -1,0 +1,1 @@
+ALTER TABLE `saved_germany_programmes` ADD `decision_notes` text;

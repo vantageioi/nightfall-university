@@ -1,0 +1,20 @@
+CREATE TABLE `student_fit_profiles` (
+	`id` int AUTO_INCREMENT NOT NULL,
+	`user_id` int NOT NULL,
+	`study_direction` varchar(240) NOT NULL,
+	`study_level` varchar(80),
+	`academic_average` varchar(80),
+	`grade_scale` varchar(120),
+	`qualifications` text,
+	`nationality` varchar(120),
+	`language_comfort` varchar(320),
+	`tuition_budget_band` varchar(80),
+	`funding_route` varchar(80),
+	`has_sponsor` boolean NOT NULL DEFAULT false,
+	`priorities` text,
+	`matching_consent_at` timestamp,
+	`created_at` timestamp NOT NULL DEFAULT (now()),
+	`updated_at` timestamp NOT NULL DEFAULT (now()) ON UPDATE CURRENT_TIMESTAMP,
+	CONSTRAINT `student_fit_profiles_id` PRIMARY KEY(`id`),
+	CONSTRAINT `student_fit_profiles_user_id_unique` UNIQUE(`user_id`)
+);

@@ -1,0 +1,3 @@
+Sample CV fixture (fictional).
+Rania Demo - rania.demo@example.com - Architecture applicant.
+High school average 92/100. Syrian curriculum diploma.
