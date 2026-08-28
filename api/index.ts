@@ -1,5 +1,8 @@
 import type { IncomingMessage, ServerResponse } from "node:http";
-import { createApp } from "../server/app";
+// Vercel executes the compiled function as ESM. The explicit .js suffix maps
+// to server/app.ts at build time and prevents Node from rejecting extensionless
+// relative imports in the deployed lambda.
+import { createApp } from "../server/app.js";
 
 // Serverless instances reuse the resolved application when warm, while every
 // request remains stateless because session, records, jobs, and objects live in
