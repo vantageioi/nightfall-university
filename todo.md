@@ -272,3 +272,11 @@
 - [ ] Create a sanitized GitHub repository snapshot of the authoritative Nightfall source, excluding secrets, private data, local artifacts, and generated deployment output.
 - [ ] Verify the GitHub repository contains the reproducible source and documentation without credential values or private student records.
 - [x] Provide a compliant per-student Gmail Outreach authorization alternative that supports manually approved sends from the student’s own address without relying on the blocked Google OAuth test-user flow. Approved drafts now open in the student’s own Gmail compose window; Nightfall never sends or reads a mailbox through this fallback.
+- [ ] Add a unified application-readiness board with programme-level evidence, confirmed document links, open questions, deadlines, and student-owned next actions.
+- [ ] Add source-change monitoring that records official-source snapshots, shows reviewable differences, and never silently changes a student’s application plan.
+- [ ] Add a claim-and-evidence vault and essay-version lineage so student-written statements and source support remain reviewable and reversible.
+- [ ] Add outreach contact safeguards, conversation-to-action suggestions, paste-in reply triage, manual follow-up drafts, and duplicate-send protection without autonomous delivery.
+- [ ] Add document checklists, decision journal, consultant handoff packet, language-proof planner, timezone-aware calendar handoff, and application-cost planning without eligibility, financial, or admissions predictions.
+- [ ] Add opt-in family sharing, student-controlled data export/deletion and local-only privacy controls, institutional mail-client handoff, and accessibility preferences for readable bilingual use.
+- [ ] Add a student-controlled reapply and post-decision reflection workspace that separates confirmed facts, unanswered questions, evidence updates, and approved next actions.
+- [ ] Commit and push every completed Nightfall milestone to the private GitHub repository without committing secrets, student data, runtime artifacts, or generated build output.
