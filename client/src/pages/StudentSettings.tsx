@@ -1,17 +1,17 @@
 // Nightfall Settings: Account / Connections / Plan & usage / Privacy & data / Legal.
-import { Bell, Check, ExternalLink, FileText, Loader2, LockKeyhole, Mail, Sparkles, Trash2 } from "lucide-react";
+import { Bell, Check, ExternalLink, FileText, Loader2, LockKeyhole, Mail, Sparkles, Trash2, UsersRound } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useAuth } from "@/_core/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import { LanguageToggle, usePublicLanguage } from "@/components/LanguageToggle";
 
-type Section = "account" | "connections" | "plan" | "privacy" | "legal";
+type Section = "account" | "connections" | "plan" | "privacy" | "sharing" | "legal";
 
 const copy = {
   en: {
     eyebrow: "YOUR SETTINGS", title: "How Nightfall works for you.",
-    nav: { account: "Account", connections: "Connections", plan: "Plan & usage", privacy: "Privacy & data", legal: "Legal" },
+    nav: { account: "Account", connections: "Connections", plan: "Plan & usage", privacy: "Privacy & data", sharing: "Family view", legal: "Legal" },
     accountTitle: "Signed in as", method: "Sign-in method",
     connectionsTitle: "Connections", connectionsBody: "Bring your own keys and inboxes. Everything sensitive is encrypted under a key unique to your account — deleting your account destroys that key.",
     gmailLabel: "Gmail", gmailBody: "Drafts are prepared here. Nothing sends without your explicit click-to-approve.", connectGmail: "Connect Gmail", disconnectGmail: "Disconnect", gmailUnavailable: "Gmail connection is not available yet", gmailUnavailableBody: "Nightfall’s inbox connection is being prepared. Your drafts remain review-only, and no message can be sent until this connection is configured.",
@@ -22,11 +22,11 @@ const copy = {
     aiLimit: "Platform AI calls / day", programmesCap: "Saved programmes cap", byoNote: "Have your own Gemini key? You are unlimited regardless of plan.",
     privacyTitle: "Privacy & data", exportLabel: "Download my data", exportBody: "Everything Nightfall holds about you, as JSON. Secrets excluded.", exportBtn: "Export JSON",
     deleteLabel: "Delete account", deleteBody: "Hard-deletes every personal record and destroys your encryption key. Sealed data in existing backups becomes permanently unreadable. This cannot be undone.", confirmPrompt: "Type DELETE MY ACCOUNT to confirm", deleteBtn: "Delete my account forever",
-    legalTitle: "Legal", terms: "Terms & Conditions", eula: "End User License Agreement", privacyPolicy: "Privacy Policy", view: "View",
+    sharingTitle: "Share a small, read-only view", sharingBody: "Create a link for one trusted person. It shows only high-level journey progress, your shortlist, and milestones—never documents, messages, passwords, AI keys, or edit controls.", sharingEmail: "Trusted person’s email", sharingRelationship: "Relationship", createShare: "Create read-only link", copyLink: "Copy link", createdShares: "Your active links", legalTitle: "Legal", terms: "Terms & Conditions", eula: "End User License Agreement", privacyPolicy: "Privacy Policy", view: "View",
   },
   ar: {
     eyebrow: "إعداداتك", title: "كيف بيشتغل نايتفول إلك.",
-    nav: { account: "الحساب", connections: "الاتصالات", plan: "الخطة والاستخدام", privacy: "الخصوصية والبيانات", legal: "قانوني" },
+    nav: { account: "الحساب", connections: "الاتصالات", plan: "الخطة والاستخدام", privacy: "الخصوصية والبيانات", sharing: "عرض العيلة", legal: "قانوني" },
     accountTitle: "مسجّل دخول باسم", method: "طريقة الدخول",
     connectionsTitle: "الاتصالات", connectionsBody: "جرّب مفاتيحك وصناديقك الخاصة. كل شي حساس مشفّر بمفتاح خاص فيك — وحذف الحساب بدمّر هالمفتاح.",
     gmailLabel: "غمايل Gmail", gmailBody: "المسودات بتتحضر هون. ما بينبعت شي بدون ضغطة موافقتك الصريحة.", connectGmail: "وصّل Gmail", disconnectGmail: "فصل", gmailUnavailable: "ربط Gmail مو متاح لسه", gmailUnavailableBody: "عم نجهّز ربط البريد لنايتفول. مسوداتك بتضل للمراجعة فقط، وما في رسالة بتنرسل قبل ما يجهز الربط.",
@@ -37,7 +37,7 @@ const copy = {
     aiLimit: "طلبات الذكاء الاصطناعي / يوم", programmesCap: "حد البرامج المحفوظة", byoNote: "عندك مفتاح Gemini خاص؟ إنت بلا حدود مهما كانت الخطة.",
     privacyTitle: "الخصوصية والبيانات", exportLabel: "نزّل بياناتي", exportBody: "كل شي نايتفول عارفو عنك، بصيغة JSON. بدون الأسرار.", exportBtn: "تصدير JSON",
     deleteLabel: "حذف الحساب", deleteBody: "بينحذف كل سجل شخصي، ويندمّر مفتاح التشفير تبعك. أي بيانات مشفرة بالنسخ الاحتياطية بتصير مستحيلة القراءة للأبد. ما بينرجع رجوع.", confirmPrompt: "اكتب DELETE MY ACCOUNT للتأكيد", deleteBtn: "احذف حسابي للأبد",
-    legalTitle: "قانوني", terms: "الشروط والأحكام", eula: "اتفاقية الترخيص", privacyPolicy: "سياسة الخصوصية", view: "عرض",
+    sharingTitle: "شارك عرض صغير، للقراءة فقط", sharingBody: "أنشئ رابط لشخص موثوق. بيورجي بس تقدم الرحلة العام، قائمتك المختصرة، والخطوات—ولا وثائق، رسائل، كلمات مرور، مفاتيح AI، أو صلاحية تعديل.", sharingEmail: "إيميل الشخص الموثوق", sharingRelationship: "صلة القرابة", createShare: "أنشئ رابط قراءة فقط", copyLink: "انسخ الرابط", createdShares: "روابطك الفعالة", legalTitle: "قانوني", terms: "الشروط والأحكام", eula: "اتفاقية الترخيص", privacyPolicy: "سياسة الخصوصية", view: "عرض",
   },
 } as const;
 
@@ -51,18 +51,22 @@ export default function StudentSettings() {
   const [section, setSection] = useState<Section>("account");
   const [geminiKey, setGeminiKey] = useState("");
   const [confirmText, setConfirmText] = useState("");
+  const [familyEmail, setFamilyEmail] = useState("");
+  const [familyRelationship, setFamilyRelationship] = useState("");
 
   const relationship = trpc.student.universityRelationshipWorkspace.useQuery();
   const gmailAvailability = trpc.student.gmailAvailability.useQuery();
   const geminiStatus = trpc.student.geminiKeyStatus.useQuery();
   const llmAvailability = trpc.student.llmAvailability.useQuery();
   const planUsage = trpc.student.planUsage.useQuery();
+  const familyInvites = trpc.family.list.useQuery();
   const utils = trpc.useUtils();
 
   const saveKey = trpc.student.saveGeminiApiKey.useMutation({ onSuccess: () => { setGeminiKey(""); void utils.student.geminiKeyStatus.invalidate(); void utils.student.llmAvailability.invalidate(); void utils.student.planUsage.invalidate(); } });
   const clearKey = trpc.student.clearGeminiApiKey.useMutation({ onSuccess: () => { void utils.student.geminiKeyStatus.invalidate(); void utils.student.llmAvailability.invalidate(); } });
   const disconnectGmail = trpc.student.disconnectStudentGmail.useMutation({ onSuccess: () => void utils.student.universityRelationshipWorkspace.invalidate() });
   const deleteAccount = trpc.student.deleteAccount.useMutation({ onSuccess: () => { setLocation("/"); window.location.href = "/"; } });
+  const createFamilyInvite = trpc.family.invite.useMutation({ onSuccess: () => { setFamilyEmail(""); setFamilyRelationship(""); void familyInvites.refetch(); } });
 
   const gmailConnected = Boolean(relationship.data?.inboxConnection);
   const gmailConfigured = Boolean(gmailAvailability.data?.configured);
@@ -71,6 +75,7 @@ export default function StudentSettings() {
     { id: "connections", label: t.nav.connections },
     { id: "plan", label: t.nav.plan },
     { id: "privacy", label: t.nav.privacy },
+    { id: "sharing", label: t.nav.sharing },
     { id: "legal", label: t.nav.legal },
   ];
 
@@ -95,6 +100,8 @@ export default function StudentSettings() {
           <div className="border border-white/12 bg-white/[.02] p-5"><p className="flex items-center gap-2 text-sm font-semibold text-white"><FileText className="h-4 w-4" />{t.exportLabel}</p><p className="mt-2 text-xs leading-5 text-[#aaaaaa]">{t.exportBody}</p><ExportButton label={t.exportBtn} /></div>
           <div className="border border-red-500/25 p-5"><p className="flex items-center gap-2 text-sm font-semibold text-red-300"><Trash2 className="h-4 w-4" />{t.deleteLabel}</p><p className="mt-2 text-xs leading-5 text-[#dbdbdb]">{t.deleteBody}</p><input value={confirmText} onChange={(event) => setConfirmText(event.target.value)} placeholder={t.confirmPrompt} className="mt-4 w-full max-w-md border border-white/15 bg-black/20 px-4 py-3 text-sm outline-none placeholder:text-white/30" /><button onClick={() => deleteAccount.mutate({ confirmText: confirmText as "DELETE MY ACCOUNT" })} disabled={confirmText !== "DELETE MY ACCOUNT" || deleteAccount.isPending} className="mt-3 block w-full max-w-md border border-red-400/60 px-4 py-3 text-[10px] font-bold uppercase tracking-[.08em] text-red-200 enabled:hover:bg-red-500/10 disabled:opacity-40">{deleteAccount.isPending ? <Loader2 className="mx-auto h-4 w-4 animate-spin" /> : t.deleteBtn}</button></div>
         </section>}
+
+        {section === "sharing" && <section className="space-y-5"><p className="nf-label text-[#a0a0a0]">// {t.nav.sharing}</p><h2 className="text-xl font-semibold">{t.sharingTitle}</h2><div className="border border-white/12 bg-white/[.02] p-5"><UsersRound className="h-5 w-5" /><p className="mt-3 max-w-xl text-sm leading-6 text-[#aaaaaa]">{t.sharingBody}</p><div className="mt-5 grid gap-3 sm:grid-cols-2"><input value={familyEmail} onChange={(event) => setFamilyEmail(event.target.value)} type="email" placeholder={t.sharingEmail} className="border border-white/15 bg-black/20 px-4 py-3 text-sm outline-none placeholder:text-white/30" /><input value={familyRelationship} onChange={(event) => setFamilyRelationship(event.target.value)} placeholder={t.sharingRelationship} className="border border-white/15 bg-black/20 px-4 py-3 text-sm outline-none placeholder:text-white/30" /></div><button type="button" onClick={() => createFamilyInvite.mutate({ email: familyEmail.trim(), relationship: familyRelationship.trim() })} disabled={createFamilyInvite.isPending || !/^\S+@\S+\.\S+$/.test(familyEmail) || familyRelationship.trim().length < 2} className="nf-button mt-3 inline-flex items-center gap-2 border border-white bg-white px-4 py-3 text-[10px] font-bold uppercase tracking-[.08em] text-black disabled:opacity-40">{createFamilyInvite.isPending ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <UsersRound className="h-3.5 w-3.5" />}{t.createShare}</button>{createFamilyInvite.error && <p className="mt-3 text-xs text-white/60">{createFamilyInvite.error.message}</p>}</div><div className="border border-white/12 bg-white/[.02] p-5"><p className="nf-label text-[8px] text-white/45">// {t.createdShares}</p><div className="mt-4 space-y-2">{(familyInvites.data ?? []).map((invite) => { const href = `${window.location.origin}/family/${invite.token}`; return <div key={invite.id} className="flex flex-wrap items-center justify-between gap-3 border border-white/10 p-3"><div><p className="text-sm font-semibold">{invite.relationship}</p><p className="mt-1 text-xs text-white/50">{invite.email}</p></div><button type="button" onClick={() => void navigator.clipboard.writeText(href)} className="nf-button inline-flex items-center gap-2 border border-white/20 px-3 py-2 text-[10px] hover:bg-white hover:text-black"><ExternalLink className="h-3.5 w-3.5" />{t.copyLink}</button></div>; })}{!(familyInvites.data ?? []).length && <p className="text-sm text-white/50">{t.sharingBody}</p>}</div></div></section>}
 
         {section === "legal" && <section className="space-y-4"><p className="nf-label text-[#a0a0a0]">// {t.nav.legal}</p><h2 className="text-xl font-semibold">{t.legalTitle}</h2>{([["terms", t.terms], ["eula", t.eula], ["privacy", t.privacyPolicy]] as const).map(([doc, label]) => <a key={doc} href={`/legal/${doc}`} target="_blank" rel="noreferrer" className="flex items-center justify-between border border-white/12 bg-white/[.02] p-5 text-sm text-white hover:border-white"><span>{label}</span><ExternalLink className="h-4 w-4 text-[#979797]" /></a>)}</section>}
       </div>
